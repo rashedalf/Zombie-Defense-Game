@@ -37,14 +37,14 @@ ZOMBIESIZE = 70 #includes newKindZombies
 ADDNEWZOMBIERATE = 30
 ADDNEWKINDZOMBIE = ADDNEWZOMBIERATE
 
-NORMALZOMBIESPEED = 2
+NORMALZOMBIESPEED = 4
 NEWKINDZOMBIESPEED = NORMALZOMBIESPEED / 2
 
 PLAYERMOVERATE = 15
 BULLETSPEED = 10
 ADDNEWBULLETRATE = 15
 
-TEXTCOLOR = (255, 255, 255)
+TEXTCOLOR = (0, 240, 255)
 RED = (255, 0, 0)
 
 def terminate():
@@ -57,7 +57,7 @@ def waitForPlayerToPressKey():
             if event.type == QUIT:
                 terminate()
             if event.type == KEYDOWN:
-                if event.key == K_ESCAPE: # pressing escape quits
+                if event.key == K_END: # pressing escape quits
                     terminate()
                 if event.key == K_RETURN:
                     return
@@ -91,8 +91,9 @@ def drawText(text, font, surface, x, y):
 # set up pygame, the window, and the mouse cursor
 pygame.init()
 mainClock = pygame.time.Clock()
-windowSurface = pygame.display.set_mode((WINDOWWIDTH, WINDOWHEIGHT))#, pygame.FULLSCREEN)
-pygame.display.set_caption('Zombie Defence')
+infoObject = pygame.display.Info()
+windowSurface = pygame.display.set_mode((infoObject.current_w, infoObject.current_h), pygame.FULLSCREEN)
+pygame.display.set_caption('Zombie Attack')
 pygame.mouse.set_visible(False)
 
 # set up fonts
@@ -103,17 +104,17 @@ gameOverSound = pygame.mixer.Sound('gameover.wav')
 pygame.mixer.music.load('grasswalk.mp3')
 
 # set up images
-playerImage = pygame.image.load('SnowPea.gif')
+playerImage = pygame.image.load('fire_pea.png')
 playerRect = playerImage.get_rect()
 
-bulletImage = pygame.image.load('SnowPeashooterBullet.gif')
+bulletImage = pygame.image.load('fireball.gif')
 bulletRect = bulletImage.get_rect()
 
-zombieImage = pygame.image.load('tree.png')
-newKindZombieImage = pygame.image.load('ConeheadZombieAttack.gif')
+zombieImage = pygame.image.load('mummies-zombie2.png')
+newKindZombieImage = pygame.image.load('mummies-zombie.png')
 
-backgroundImage = pygame.image.load('background.png')
-rescaledBackground = pygame.transform.scale(backgroundImage, (WINDOWWIDTH, WINDOWHEIGHT))
+backgroundImage = pygame.image.load('zombie-town.jpg')
+rescaledBackground = pygame.transform.scale(backgroundImage, (infoObject.current_w, infoObject.current_h))
 
 # show the "Start" screen
 windowSurface.blit(rescaledBackground, (0, 0))
@@ -134,7 +135,7 @@ while True:
 
     playerRect.topleft = (50, WINDOWHEIGHT /2)
     moveLeft = moveRight = False
-    moveUp=moveDown = False
+    moveUp = moveDown = False
     shoot = False
 
     zombieAddCounter = 0
@@ -155,12 +156,13 @@ while True:
                     moveUp = False
                     moveDown = True
 
+                if event.key == K_ESCAPE:
+                        terminate()
+
                 if event.key == K_SPACE:
                     shoot = True
 
             if event.type == KEYUP:
-                if event.key == K_ESCAPE:
-                        terminate()
 
                 if event.key == K_UP or event.key == ord('w'):
                     moveUp = False
@@ -175,7 +177,7 @@ while True:
         if zombieAddCounter == ADDNEWKINDZOMBIE:
             zombieAddCounter = 0
             zombieSize = ZOMBIESIZE       
-            newZombie = {'rect': pygame.Rect(WINDOWWIDTH, random.randint(10,WINDOWHEIGHT-zombieSize-10), zombieSize, zombieSize),
+            newZombie = {'rect': pygame.Rect(infoObject.current_w, random.randint(10,WINDOWHEIGHT-zombieSize-10), zombieSize, zombieSize),
                         'surface':pygame.transform.scale(zombieImage, (zombieSize, zombieSize)),
                         }
 
@@ -186,7 +188,7 @@ while True:
         if newKindZombieAddCounter == ADDNEWZOMBIERATE:
             newKindZombieAddCounter = 0
             newKindZombiesize = ZOMBIESIZE
-            newCrawler = {'rect': pygame.Rect(WINDOWWIDTH, random.randint(10,WINDOWHEIGHT-newKindZombiesize-10), newKindZombiesize, newKindZombiesize),
+            newCrawler = {'rect': pygame.Rect(infoObject.current_w, random.randint(10,WINDOWHEIGHT-newKindZombiesize-10), newKindZombiesize, newKindZombiesize),
                         'surface':pygame.transform.scale(newKindZombieImage, (newKindZombiesize, newKindZombiesize)),
                         }
             newKindZombies.append(newCrawler)
@@ -264,7 +266,7 @@ while True:
 
         # Draw the score and how many zombies got past
         drawText('zombies gotten past: %s' % (zombiesGottenPast), font, windowSurface, 10, 20)
-        drawText('score: %s' % (score), font, windowSurface, 10, 50)
+        drawText('score: %s' % (score), font, windowSurface, 10, 60)
 
         # update the display
         pygame.display.update()
@@ -291,7 +293,7 @@ while True:
         drawText('score: %s' % (score), font, windowSurface, 10, 30)
         drawText('GAME OVER', font, windowSurface, (WINDOWWIDTH / 3), (WINDOWHEIGHT / 3))
         drawText('YOUR COUNTRY HAS BEEN DESTROIED', font, windowSurface, (WINDOWWIDTH / 4)- 80, (WINDOWHEIGHT / 3) + 100)
-        drawText('Press enter to play again or escape to exit', font, windowSurface, (WINDOWWIDTH / 4) - 80, (WINDOWHEIGHT / 3) + 150)
+        drawText('Press enter to play again or end to exit', font, windowSurface, (WINDOWWIDTH / 4) - 80, (WINDOWHEIGHT / 3) + 150)
         pygame.display.update()
         waitForPlayerToPressKey()
     if playerHasHitZombie(playerRect, zombies):
@@ -300,7 +302,7 @@ while True:
         drawText('score: %s' % (score), font, windowSurface, 10, 30)
         drawText('GAME OVER', font, windowSurface, (WINDOWWIDTH / 3), (WINDOWHEIGHT / 3))
         drawText('YOU HAVE BEEN KISSED BY THE ZOMMBIE', font, windowSurface, (WINDOWWIDTH / 4) - 80, (WINDOWHEIGHT / 3) +100)
-        drawText('Press enter to play again or escape to exit', font, windowSurface, (WINDOWWIDTH / 4) - 80, (WINDOWHEIGHT / 3) + 150)
+        drawText('Press enter to play again or end to exit', font, windowSurface, (WINDOWWIDTH / 4) - 80, (WINDOWHEIGHT / 3) + 150)
         pygame.display.update()
         waitForPlayerToPressKey()
     gameOverSound.stop()
